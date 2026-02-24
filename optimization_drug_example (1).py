@@ -119,9 +119,6 @@ print(f"Newton's Method - Optimal Escitalopram Effect: {opt_effect_escitalopram_
 
 # %% Combined optimization + lambda tuning (ALL-IN-ONE CELL)
 
-
-
-
 # Original lambdas
 metformin_lambda = 0.5
 lisinopril_lambda = 0.8
@@ -201,7 +198,7 @@ print("Combined Effect Optimization")
 print(f"Steepest Ascent: Dose = {opt_comb_sa:.2f} mg, Effect = {val_comb_sa*100:.2f}%")
 print(f"Newton's Method: Dose = {opt_comb_nm:.2f} mg, Effect = {val_comb_nm*100:.2f}%")
 
-lambda_values = np.linspace(0.1, 1.5, 25)
+lambda_values = np.linspace(0.0, 2.0, 25)
 best_lambda = None
 best_diff = np.inf
 
@@ -211,8 +208,9 @@ for lam in lambda_values:
         toxicity = 0.3 * x**2 / 80
         return efficacy - lam * toxicity
     
-    opt_dose, _ = newtons_method(lis_temp, x0=1.0)
-    diff = abs(opt_dose - opt_comb_nm)
+    #Using Steepest Ascent for calculation.  
+    opt_dose, val_dose = steepest_ascent(lis_temp, x0=1.0)
+    diff = abs(val_dose - val_comb_sa) 
     
     if diff < best_diff:
         best_diff = diff
@@ -221,3 +219,5 @@ for lam in lambda_values:
 print("\nLambda Tuning (Lisinopril)")
 print(f"Best λ ≈ {best_lambda:.2f}")
 print(f"Closest match to combined dose within {best_diff:.2f} mg")
+
+# %%
