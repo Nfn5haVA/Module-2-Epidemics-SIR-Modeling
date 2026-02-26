@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #%%
 # Load the data
-data = pd.read_csv('C:\\Users\\karin\\OneDrive - University of Virginia\\Second Year\\Comp BME\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#1.csv', parse_dates=['date'], header=0, index_col=None)
+data = pd.read_csv('/Users/roychen/Desktop/Comp BME/Module-2-Chen_fink/Data/mystery_virus_daily_active_counts_RELEASE#1.csv', parse_dates=['date'], header=0, index_col=None)
 
 #%%
 # Make a plot of the active cases over time
