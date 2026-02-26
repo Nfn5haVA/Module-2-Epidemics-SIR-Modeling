@@ -7,7 +7,7 @@ import math
 
 #%%
 # Load the data
-data = pd.read_csv('C:\\Users\karin\OneDrive - University of Virginia\\Second Year\\Comp BME\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#2.csv', parse_dates=['date'], header=0, index_col=None)
+data = pd.read_csv('C:\\Users\karin\OneDrive - University of Virginia\\Second Year\\Comp BME\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#1.csv', parse_dates=['date'], header=0, index_col=None)
 #%%
 # We have day number, date, and active cases. We can use the day number and active cases to fit an exponential growth curve to estimate R0.
 # Let's define the exponential growth function
@@ -29,16 +29,16 @@ for case in data['active reported daily cases']:
 
 opt_r, covariance = curve_fit(exponential_growth, days, active_cases)
 # Approximate R0 using this fit
-ip_low = 7
+ip_low = 7 #we know that the infectious period is 7-11 days, so we will use those to calculate a range for R0
 ip_high = 11
 
-rdprod_low = ip_low * opt_r
+rdprod_low = ip_low * opt_r # finding rD for low and high ends of infectious period
 rdprod_high = ip_high * opt_r
 
 low_r0 = math.e ** rdprod_low
 high_r0 = math.e ** rdprod_high
 
-print(f"r0 Range: {low_r0} - {high_r0}")
+print(f"r0 Range: {low_r0} - {high_r0}") 
 
 
 # Add the fit as a line on top of your scatterplot.
@@ -48,8 +48,8 @@ plt.title("Active Cases Over Time")
 plt.xlabel("Time (days)")
 plt.ylabel("Active Reported Daily Cases")
 
-t_axis = np.linspace(1, max(days), 400)
+t_axis = np.linspace(1, max(days), 400) # creates a an array of 400 evenly spaced points between one and the number of days in the csv file
 y_axis = exponential_growth(t_axis,opt_r[0])
-plt.plot(t_axis, y_axis, color = 'red')
+plt.plot(t_axis, y_axis, color = 'red') #plot a line of the fit on top of the scatterplot
 
 plt.show()
