@@ -52,4 +52,77 @@ t_axis = np.linspace(1, max(days), 400) # creates a an array of 400 evenly space
 y_axis = exponential_growth(t_axis,opt_r[0])
 plt.plot(t_axis, y_axis, color = 'red') #plot a line of the fit on top of the scatterplot
 
-plt.show()
+#plt.show()
+
+#1/infectious period, which we know is 7-11 days
+gamma_high = 0.143
+gamma_low = 0.091 
+
+# 1/incubation period, which we know is 12-18 days
+sigma_high = 0.0833
+sigma_low = 0.0556
+# estimated R0 range * gamma range 
+beta_low = 0.211
+beta_high = 0.534
+
+sse = 1000
+N = 17612
+i0 = 1
+r0 = 0
+e0 = 2
+s0 = N - e0 - i0 - r0
+def eulers(beta, sigma, gamma, s0, e0, i0, r0, timepoints, N):
+    s = [s0]
+    e = [e0]
+    i = [i0]
+    r = [r0]
+
+    for timepoint in range(len(timepoints)):
+        dS_dt = -1 * beta * s[timepoint] * i[timepoint] / N # calculate the derivative at the current timepoint based on the equations from class
+        s.append(s[timepoint] + dS_dt)
+
+        dE_dt = (beta * s[timepoint] * i[timepoint] / N) - (sigma * e[timepoint])
+        e.append(e[timepoint] + dE_dt)
+
+        dI_dt = (sigma * e[timepoint]) - (gamma * i[timepoint])
+        i.append(i[timepoint] + dI_dt)
+
+        dR_dt = gamma * i[timepoint]
+        r.append(r[timepoint] + dR_dt) 
+    
+    return s, e, i, r
+
+
+def optimization():       
+    sse = 10000000000000000
+    best_b = 0
+    best_s = 0
+    best_g = 0
+
+    # iterate through every combination of beta, gamma, and sigma, calculating sse for each combo and determining the best parameters 
+    for beta in np.arange(beta_low, beta_high, 0.01):
+        for sigma in np.arange(sigma_low, sigma_high, 0.01):
+            for gamma in np.arange(gamma_low, gamma_high, 0.01):
+                s, e, i, r = eulers(beta, sigma, gamma, s0, e0, i0, r0, days, N)
+                sse_new = np.sum((np.array(i[:len(data)]) - active_cases)**2)
+                #print("placeholder")
+                #sse_new = np.sum((i - y_axis)**2)
+                if sse_new < sse:
+                    sse = sse_new
+                    best_b = beta
+                    best_s = sigma
+                    best_g = gamma
+    
+    return best_b, best_s, best_g, sse
+
+
+best_beta, best_ssigma, best_gamma, sse= optimization()
+
+def prediction(best_beta, best_sigma, best_gamma):
+    print("placeholder")
+
+
+
+
+
+
