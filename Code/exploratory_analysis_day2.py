@@ -7,7 +7,7 @@ import math
 
 #%%
 # Load the data
-data = pd.read_csv('C:\\Users\karin\OneDrive - University of Virginia\\Second Year\\Comp BME\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#1.csv', parse_dates=['date'], header=0, index_col=None)
+data = pd.read_csv("/Users/roychen/Desktop/Module-2-Chen_fink/Data/mystery_virus_daily_active_counts_RELEASE#1.csv", parse_dates=['date'], header=0, index_col=None)
 #%%
 # We have day number, date, and active cases. We can use the day number and active cases to fit an exponential growth curve to estimate R0.
 # Let's define the exponential growth function
@@ -124,5 +124,34 @@ def prediction(best_beta, best_sigma, best_gamma):
 
 
 
+def prediction(best_beta, best_sigma, best_gamma):
+    # set up the time points in the furture to run the predicted model. 
+    future_days = list(range(500))
+    # Run Euler's method far into the future to find the peak
+    s, e, i, r = eulers(best_beta, best_sigma, best_gamma, s0, e0, i0, r0, future_days, N)
+    # Find the peak number of infected individuals and the day it occurs. sitting i to numbers of days 
+    peak_value = max(i)
+    peak_day = i.index(peak_value)
+    
+    print(f"Best beta: {best_beta:.4f}, Best sigma: {best_sigma:.4f}, Best gamma: {best_gamma:.4f}")
+    print(f"Peak infections: {peak_value:.0f} people")
+    print(f"Peak occurs on day: {peak_day}")
+    # Calculate the percentage of the population that is infected at the peak
+    print(f"That is {peak_value/N*100:.1f}% of the population ({N} total)")
+    
+    # Plot the SEIR model's infected curve over time
+    # use the infected compartment curve over the 500 predicted days
+    plt.figure()
+    plt.plot(i[:len(future_days)], label='SEIR Model (Infected)', color='blue')
+    plt.axvline(x=peak_day, color='red', linestyle='--', label=f'Peak Day: {peak_day}')
+    plt.axhline(y=peak_value, color='orange', linestyle='--', label=f'Peak Value: {peak_value:.0f}')
+    plt.title("SEIR Model - Predicted Peak")
+    plt.xlabel("Day")
+    plt.ylabel("Infected")
+    plt.legend()
+    plt.show()
+    
+    return peak_value, peak_day
 
-
+# Call the function
+peak_value, peak_day = prediction(best_beta, best_ssigma, best_gamma)
