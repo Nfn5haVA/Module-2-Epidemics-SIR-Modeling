@@ -7,7 +7,7 @@ import math
 
 #%%
 # Load the data
-data = pd.read_csv("C:\\Users\\karin\\OneDrive - University of Virginia\\Second Year\\Comp BME\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#2.csv", parse_dates=['date'], header=0, index_col=None)
+data = pd.read_csv("C:\\Users\\karin\\OneDrive - University of Virginia\\Second Year\\Comp BME\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#3.csv", parse_dates=['date'], header=0, index_col=None)
 #%%
 # We have day number, date, and active cases. We can use the day number and active cases to fit an exponential growth curve to estimate R0.
 # Let's define the exponential growth function
@@ -48,9 +48,9 @@ plt.title("Active Cases Over Time")
 plt.xlabel("Time (days)")
 plt.ylabel("Active Reported Daily Cases")
 
-t_axis = np.linspace(1, max(days), 400) # creates a an array of 400 evenly spaced points between one and the number of days in the csv file
-y_axis = exponential_growth(t_axis,opt_r[0])
-plt.plot(t_axis, y_axis, color = 'red') #plot a line of the fit on top of the scatterplot
+#t_axis = np.linspace(1, max(days), 400) # creates a an array of 400 evenly spaced points between one and the number of days in the csv file
+#y_axis = exponential_growth(t_axis,opt_r[0])
+#plt.plot(t_axis, y_axis, color = 'red') #plot a line of the fit on top of the scatterplot
 
 #plt.show()
 
@@ -123,7 +123,7 @@ best_beta, best_ssigma, best_gamma, sse= optimization()
 
 def prediction(best_beta, best_sigma, best_gamma):
     # set up the time points in the furture to run the predicted model. 
-    future_days = list(range(500))
+    future_days = list(range(120))
     # Run Euler's method far into the future to find the peak
     s, e, i, r = eulers(best_beta, best_sigma, best_gamma, s0, e0, i0, r0, future_days, N)
     # Find the peak number of infected individuals and the day it occurs. sitting i to numbers of days 
@@ -138,7 +138,7 @@ def prediction(best_beta, best_sigma, best_gamma):
     
     # Plot the SEIR model's infected curve over time
     # use the infected compartment curve over the 500 predicted days
-    plt.figure()
+    #plt.figure()
     plt.plot(i[:len(future_days)], label='SEIR Model (Infected)', color='blue')
     plt.axvline(x=peak_day, color='red', linestyle='--', label=f'Peak Day: {peak_day}')
     plt.axhline(y=peak_value, color='orange', linestyle='--', label=f'Peak Value: {peak_value:.0f}')
@@ -151,4 +151,34 @@ def prediction(best_beta, best_sigma, best_gamma):
     return peak_value, peak_day
 
 # Call the function
-peak_value, peak_day = prediction(best_beta, best_ssigma, best_gamma)
+peak_value, peak_day  = prediction(best_beta, best_ssigma, best_gamma)
+
+
+# error prediction:
+
+def calc_error():
+    highest_day = 0
+    highest_infection = 0
+    for i in range(len(active_cases)):
+        if active_cases[i] > highest_infection:
+            highest_day = i 
+            highest_infection = active_cases[i]
+        
+    #error in peak number of cases
+    true_peak_num = highest_infection 
+    pred_peak_num = peak_value 
+    peak_num_error = ((true_peak_num - pred_peak_num) / true_peak_num) * 100
+
+    # error in peak days
+    true_peak_day = highest_day 
+    pred_peak_day = peak_day
+    peak_day_error = ((true_peak_day - pred_peak_day) / true_peak_day) * 100
+
+    return f"True Percent Error in the Peak Number of Cases: {peak_num_error}%  \n   True Percent Error in Peak Days: {peak_day_error}"
+
+print(calc_error())
+
+
+
+
+
