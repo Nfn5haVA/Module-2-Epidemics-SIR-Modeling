@@ -71,6 +71,8 @@ i0 = 1
 r0 = 0
 e0 = 2
 s0 = N - e0 - i0 - r0
+
+
 def eulers(beta, sigma, gamma, s0, e0, i0, r0, timepoints, N):
     s = [s0]
     e = [e0]
@@ -93,17 +95,17 @@ def eulers(beta, sigma, gamma, s0, e0, i0, r0, timepoints, N):
     return s, e, i, r
 
 
-def optimization():       
+def optimization(b_low, b_high, s_low, s_high, g_low, g_high, start_day, s_0, e_0, i_0, r_0):       
     sse = 10000000000000000
     best_b = 0
     best_s = 0
     best_g = 0
 
     # iterate through every combination of beta, gamma, and sigma, calculating sse for each combo and determining the best parameters 
-    for beta in np.arange(beta_low, beta_high, 0.01):
-        for sigma in np.arange(sigma_low, sigma_high, 0.01):
-            for gamma in np.arange(gamma_low, gamma_high, 0.01):
-                s, e, i, r = eulers(beta, sigma, gamma, s0, e0, i0, r0, days, N)
+    for beta in np.arange(b_low, b_high, 0.01):
+        for sigma in np.arange(s_low, s_high, 0.01):
+            for gamma in np.arange(g_low, g_high, 0.01):
+                s, e, i, r = eulers(beta, sigma, gamma, s_0, e_0, i_0, r_0, days, N)
                 sse_new = np.sum((np.array(i[:len(data)]) - active_cases)**2)
                 #print("placeholder")
                 #sse_new = np.sum((i - y_axis)**2)
@@ -115,43 +117,45 @@ def optimization():
     
     return best_b, best_s, best_g, sse
 
+best_beta, best_sigma, best_gamma, sse= optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
+s, e, i, r = eulers(best_beta, best_sigma, best_gamma, s0, e0, i0, r0, days, N)
 
-best_beta, best_ssigma, best_gamma, sse= optimization()
+print(f" lol {best_beta}, {best_sigma}, {best_gamma}")
 
 
 
-
-def prediction(best_beta, best_sigma, best_gamma):
+def prediction(best_beta, best_sigma, best_gamma, start_day, end_day):
     # set up the time points in the furture to run the predicted model. 
-    future_days = list(range(120))
+    future_days = list(range(start_day, end_day))
     # Run Euler's method far into the future to find the peak
-    s, e, i, r = eulers(best_beta, best_sigma, best_gamma, s0, e0, i0, r0, future_days, N)
+    a, b, c, d = eulers(best_beta, best_sigma, best_gamma, s[start_day], e[start_day], i[start_day], r[start_day], future_days, N)
     # Find the peak number of infected individuals and the day it occurs. sitting i to numbers of days 
     peak_value = max(i)
-    peak_day = i.index(peak_value)
+    peak_day = i.index(peak_value) + start_day
     
     print(f"Best beta: {best_beta:.4f}, Best sigma: {best_sigma:.4f}, Best gamma: {best_gamma:.4f}")
     print(f"Peak infections: {peak_value:.0f} people")
     print(f"Peak occurs on day: {peak_day}")
     # Calculate the percentage of the population that is infected at the peak
     print(f"That is {peak_value/N*100:.1f}% of the population ({N} total)")
-    
-    # Plot the SEIR model's infected curve over time
-    # use the infected compartment curve over the 500 predicted days
-    #plt.figure()
-    plt.plot(i[:len(future_days)], label='SEIR Model (Infected)', color='blue')
+
+    return peak_value, peak_day, a, b, c, d, future_days
+
+def graph(future_days, i, color, start_day):
+    peak_value = max(i)
+    peak_day = i.index(peak_value) + start_day
+    plt.plot(future_days, i[:len(future_days)], label='SEIR Model (Infected)', color=color)
     plt.axvline(x=peak_day, color='red', linestyle='--', label=f'Peak Day: {peak_day}')
     plt.axhline(y=peak_value, color='orange', linestyle='--', label=f'Peak Value: {peak_value:.0f}')
-    plt.title("SEIR Model - Predicted Peak")
-    plt.xlabel("Day")
-    plt.ylabel("Infected")
-    plt.legend()
-    plt.show()
-    
-    return peak_value, peak_day
+
+
 
 # Call the function
-peak_value, peak_day  = prediction(best_beta, best_ssigma, best_gamma)
+best_beta, best_sigma, best_gamma, sse= optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
+peak_value, peak_day, s, e, i, r, future_days  = prediction(best_beta, best_sigma, best_gamma, 0, 70)
+
+#graph(future_days, i, 'blue', 0)
+
 
 
 # error prediction:
@@ -176,8 +180,28 @@ def calc_error():
 
     return f"True Percent Error in the Peak Number of Cases: {peak_num_error}%  \n   True Percent Error in Peak Days: {peak_day_error}"
 
-print(calc_error())
+#print(calc_error())
 
+def testing_model():
+    new_ip_high = 9
+    new_ip_low = 5
+    new_gh = 1/new_ip_high
+    new_gl = 1/new_ip_low
+    second_b, second_s, second_g, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, new_gh, new_gl, 69, s[69], e[69], i[69], r[69])
+    second_pv, second_pd, s2, e2, i2, r2, future_days2 = prediction(second_b, second_s, second_g, 70, 120)
+    print(i2)
+    graph(future_days2, i2, "red", 70)
+
+first_b, first_s, first_g, _1 = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
+first_pv, first_pd, s1, e1, i1, r1, future_days1 = prediction(first_b, first_s, first_g, 0, 120)
+graph(future_days1, i1, "blue", 0)
+testing_model()
+plt.title("SEIR Model - Predicted Peak")
+plt.xlabel("Day")
+plt.ylabel("Infected")
+plt.legend()
+plt.show()
+    
 
 
 
