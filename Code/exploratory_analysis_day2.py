@@ -128,7 +128,7 @@ def prediction(best_beta, best_sigma, best_gamma, start_day, end_day):
     # set up the time points in the furture to run the predicted model. 
     future_days = list(range(start_day, end_day))
     # Run Euler's method far into the future to find the peak
-    a, b, c, d = eulers(best_beta, best_sigma, best_gamma, s[start_day], e[start_day], i[start_day], r[start_day], future_days, N)
+    susceptible, exposed, infected, recovered = eulers(best_beta, best_sigma, best_gamma, s[start_day], e[start_day], i[start_day], r[start_day], future_days, N)
     # Find the peak number of infected individuals and the day it occurs. sitting i to numbers of days 
     peak_value = max(i)
     peak_day = i.index(peak_value) + start_day
@@ -139,14 +139,14 @@ def prediction(best_beta, best_sigma, best_gamma, start_day, end_day):
     # Calculate the percentage of the population that is infected at the peak
     print(f"That is {peak_value/N*100:.1f}% of the population ({N} total)")
 
-    return peak_value, peak_day, a, b, c, d, future_days
+    return peak_value, peak_day, susceptible, exposed, infected, recovered, future_days
 
-def graph(future_days, i, color, start_day):
+def graph(future_days, i, color, start_day, label):
     peak_value = max(i)
     peak_day = i.index(peak_value) + start_day
-    plt.plot(future_days, i[:len(future_days)], label='SEIR Model (Infected)', color=color)
-    plt.axvline(x=peak_day, color='red', linestyle='--', label=f'Peak Day: {peak_day}')
-    plt.axhline(y=peak_value, color='orange', linestyle='--', label=f'Peak Value: {peak_value:.0f}')
+    plt.plot(future_days, i[:len(future_days)], label= label, color=color)
+    #plt.axvline(x=peak_day, color='red', linestyle='--', label=f'Peak Day: {peak_day}')
+    #plt.axhline(y=peak_value, color='orange', linestyle='--', label=f'Peak Value: {peak_value:.0f}')
 
 
 
@@ -190,12 +190,30 @@ def testing_model():
     second_b, second_s, second_g, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, new_gh, new_gl, 69, s[69], e[69], i[69], r[69])
     second_pv, second_pd, s2, e2, i2, r2, future_days2 = prediction(second_b, second_s, second_g, 70, 120)
     print(i2)
-    graph(future_days2, i2, "red", 70)
+    graph(future_days2, i2, "red", 70, 'Testing and Quarantine')
+
+
+def vaccine_model():
+    b_val, s_val, g_val, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
+    pday, value, vs, ve, vi, vr, future_daysv = prediction(b_val, s_val, g_val, 0, 70)
+
+    print(F"s: {vs[70]}, e: {ve[70]}, i: {vi[70]}, r: {vr[70]}")
+
+    new_s0 = vs[70] - (0.9 *2000)
+    new_e0 = ve[70]
+    new_i0 = vi[70]
+    new_vr = vr[70] + (0.9 * 2000)
+
+    b2_val, s2_val, g2_val, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 70, new_s0, new_e0, new_i0, new_vr)
+    pday2, value2, vs2, ve2, vi2, vr2, future_daysv2 = prediction(b2_val, s2_val, g2_val, 70, 120)
+    graph(future_daysv2,vi2, "purple", 70, 'Single Event Vaccine') 
+
 
 first_b, first_s, first_g, _1 = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
 first_pv, first_pd, s1, e1, i1, r1, future_days1 = prediction(first_b, first_s, first_g, 0, 120)
-graph(future_days1, i1, "blue", 0)
+graph(future_days1, i1, "blue", 0, 'SEIR Model (Infected)')
 testing_model()
+vaccine_model()
 plt.title("SEIR Model - Predicted Peak")
 plt.xlabel("Day")
 plt.ylabel("Infected")
