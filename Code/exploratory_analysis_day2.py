@@ -48,9 +48,9 @@ plt.title("Active Cases Over Time")
 plt.xlabel("Time (days)")
 plt.ylabel("Active Reported Daily Cases")
 
-#t_axis = np.linspace(1, max(days), 400) # creates a an array of 400 evenly spaced points between one and the number of days in the csv file
-#y_axis = exponential_growth(t_axis,opt_r[0])
-#plt.plot(t_axis, y_axis, color = 'red') #plot a line of the fit on top of the scatterplot
+t_axis = np.linspace(1, max(days), 400) # creates a an array of 400 evenly spaced points between one and the number of days in the csv file
+y_axis = exponential_growth(t_axis,opt_r[0])
+plt.plot(t_axis, y_axis, color = 'red') #plot a line of the fit on top of the scatterplot
 
 #plt.show()
 
@@ -215,7 +215,7 @@ first_pv, first_pd, s1, e1, i1, r1, future_days1 = prediction(first_b, first_s, 
 graph(future_days1, i1, "blue", 0, 'SEIR Model (Infected)')
 testing_model()
 vaccine_model()
-
+print(calc_error()) 
 plt.title("SEIR Model - Predicted Peak")
 plt.xlabel("Day")
 plt.ylabel("Infected")
