@@ -7,7 +7,7 @@ import math
 
 #%%
 # Load the data
-data = pd.read_csv("C:\\Users\\karin\\OneDrive - University of Virginia\\Second Year\\Comp BME\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#3.csv", parse_dates=['date'], header=0, index_col=None)
+data = pd.read_csv("C:\\Users\\karin\\OneDrive - University of Virginia\\Second Year\\Comp BME\\Module-2-Epidemics-SIR-Modeling\\Code\\please work\\Data\\mystery_virus_daily_active_counts_RELEASE#3.csv", parse_dates=['date'], header=0, index_col=None)
 #%%
 # We have day number, date, and active cases. We can use the day number and active cases to fit an exponential growth curve to estimate R0.
 # Let's define the exponential growth function
@@ -132,6 +132,10 @@ def prediction(best_beta, best_sigma, best_gamma, start_day, end_day):
     # Find the peak number of infected individuals and the day it occurs. sitting i to numbers of days 
     peak_value = max(i)
     peak_day = i.index(peak_value) + start_day
+    peak_index = i.index(peak_value)
+
+    before_day = peak_day - 1
+    before_peak_value = i[peak_index - 1]
     
     print(f"Best beta: {best_beta:.4f}, Best sigma: {best_sigma:.4f}, Best gamma: {best_gamma:.4f}")
     print(f"Peak infections: {peak_value:.0f} people")
@@ -139,7 +143,7 @@ def prediction(best_beta, best_sigma, best_gamma, start_day, end_day):
     # Calculate the percentage of the population that is infected at the peak
     print(f"That is {peak_value/N*100:.1f}% of the population ({N} total)")
 
-    return peak_value, peak_day, susceptible, exposed, infected, recovered, future_days
+    return peak_value, peak_day, susceptible, exposed, infected, recovered, future_days, before_peak_value, before_day
 
 def graph(future_days, i, color, start_day, label):
     peak_value = max(i)
@@ -151,8 +155,8 @@ def graph(future_days, i, color, start_day, label):
 
 
 # Call the function
-best_beta, best_sigma, best_gamma, sse= optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
-peak_value, peak_day, s, e, i, r, future_days  = prediction(best_beta, best_sigma, best_gamma, 0, 70)
+#best_beta, best_sigma, best_gamma, sse= optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
+#peak_value, peak_day, s, e, i, r, future_days, _1, _2  = prediction(best_beta, best_sigma, best_gamma, 0, 70)
 
 #graph(future_days, i, 'blue', 0)
 
@@ -187,35 +191,36 @@ def testing_model():
     new_ip_low = 5
     new_gh = 1/new_ip_high
     new_gl = 1/new_ip_low
-    second_b, second_s, second_g, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, new_gh, new_gl, 69, s[69], e[69], i[69], r[69])
-    second_pv, second_pd, s2, e2, i2, r2, future_days2 = prediction(second_b, second_s, second_g, 70, 120)
-    print(i2)
-    graph(future_days2, i2, "red", 70, 'Testing and Quarantine')
+    #second_b, second_s, second_g, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, new_gh, new_gl, 69, s[69], e[69], i[69], r[69])
+    #second_pv, second_pd, s2, e2, i2, r2, future_days2, n, n2 = prediction(second_b, second_s, second_g, 70, 120)
+    #print(i2)
+    #graph(future_days2, i2, "red", 70, 'Testing and Quarantine')
 
 
 def vaccine_model():
     b_val, s_val, g_val, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
-    pday, value, vs, ve, vi, vr, future_daysv = prediction(b_val, s_val, g_val, 0, 70)
+    pday, value, vs, ve, vi, vr, future_daysv, n3, n4 = prediction(b_val, s_val, g_val, 0, 70)
 
-    print(F"s: {vs[70]}, e: {ve[70]}, i: {vi[70]}, r: {vr[70]}")
+    #print(F"s: {vs[70]}, e: {ve[70]}, i: {vi[70]}, r: {vr[70]}")
 
     new_s0 = vs[70] - (0.9 *2000)
     new_e0 = ve[70]
     new_i0 = vi[70]
     new_vr = vr[70] + (0.9 * 2000)
 
-    b2_val, s2_val, g2_val, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 70, new_s0, new_e0, new_i0, new_vr)
-    pday2, value2, vs2, ve2, vi2, vr2, future_daysv2 = prediction(b2_val, s2_val, g2_val, 70, 120)
-    graph(future_daysv2,vi2, "purple", 70, 'Single Event Vaccine') 
-
+    #b2_val, s2_val, g2_val, _ = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 70, new_s0, new_e0, new_i0, new_vr)
+    #pday2, value2, vs2, ve2, vi2, vr2, future_daysv2, n5, n6 = prediction(b2_val, s2_val, g2_val, 70, 120)
+    #graph(future_daysv2,vi2, "purple", 70, 'Single Event Vaccine') 
+    
 
 first_b, first_s, first_g, _1 = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
-first_pv, first_pd, s1, e1, i1, r1, future_days1 = prediction(first_b, first_s, first_g, 0, 120)
+first_pv, first_pd, s1, e1, i1, r1, future_days1, before_peak, before_peak_day = prediction(first_b, first_s, first_g, 0, 120)
 
-graph(future_days1, i1, "blue", 0, 'SEIR Model (Infected)')
-testing_model()
-vaccine_model()
-print(calc_error()) 
+#graph(future_days1, i1, "blue", 0, 'SEIR Model (Infected)')
+#testing_model()
+#vaccine_model()
+#print(calc_error()) 
+print(f"Before peak day: {before_peak_day}  |   Before Peak Value: {before_peak}")
 plt.title("SEIR Model - Predicted Peak")
 plt.xlabel("Day")
 plt.ylabel("Infected")
