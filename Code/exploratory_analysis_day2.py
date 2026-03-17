@@ -211,9 +211,11 @@ def vaccine_model():
 
 first_b, first_s, first_g, _1 = optimization(beta_low, beta_high, sigma_low, sigma_high, gamma_low, gamma_high, 0, s0, e0, i0, r0)
 first_pv, first_pd, s1, e1, i1, r1, future_days1 = prediction(first_b, first_s, first_g, 0, 120)
+
 graph(future_days1, i1, "blue", 0, 'SEIR Model (Infected)')
 testing_model()
 vaccine_model()
+
 plt.title("SEIR Model - Predicted Peak")
 plt.xlabel("Day")
 plt.ylabel("Infected")
